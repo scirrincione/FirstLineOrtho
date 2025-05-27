@@ -8,5 +8,5 @@ export default defineConfig({
   build: {
     outDir: 'build'
   },
-  base: '/firstlineortho/'
+  base: '/FirstLineOrtho/'
 })

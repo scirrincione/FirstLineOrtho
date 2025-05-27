@@ -7,7 +7,7 @@ function OpenAIChatBot() {
   const [messages, setMessages] = useState([
     {
       role: 'system',
-      content: `test`
+      content: `test`,
     },
   ]);
 
@@ -92,7 +92,12 @@ function OpenAIChatBot() {
             {messages.map((message, index) => (
               <div key={index} className="mb-4">
                 <div className = "border-2 border-gray-300 p-2 rounded-xl">
-                  <h3 className="text-xl font-bold border-b-1 border-gray-300"> {message.role}</h3>
+                  <h3 className="text-xl font-bold border-b-1 border-gray-300"> 
+                    {message.role == "user"
+                      ? "User"
+                      : message.role == "system"
+                      ? "Orthobot"
+                      : message.role}</h3>
                 <p className = "text-l">{message.content}</p></div>
               </div>
             ))}
