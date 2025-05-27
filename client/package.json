@@ -1,12 +1,12 @@
 {
   "name": "client",
-  "homepage": "https://gitname.github.io/first-line-ortho",
+  "homepage": "https://gitname.github.io/firstlineortho",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist",
+    "deploy": "gh-pages -d build",
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
