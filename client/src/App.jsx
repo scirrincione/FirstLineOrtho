@@ -1,20 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import dotenv from 'dotenv';
+import React, { useState, useEffect, useRef } from 'react';
+import startMessage from './startMessage';
 
 function OpenAIChatBot() {
   const API_KEY= import.meta.env.VITE_OPEN_API_KEY;
   
   const [messages, setMessages] = useState([
-    {
-      role: 'system',
-      content: `test`,
-    },
+   
   ]);
 
   const [isTyping, setIsTyping] = useState(false);
 
   const messagesEndRef = React.createRef();
   const inputRef = React.createRef();
+  const initializedRef = useRef(false);
 
   // Function to scroll to the bottom
   const scrollToBottom = () => {
@@ -70,6 +68,51 @@ function OpenAIChatBot() {
     }
   };
 
+  useEffect(() => {
+    if(initializedRef.current) return;
+    initializedRef.current = true;
+    const initializeChat = async () => {
+      try {
+      setIsTyping(true);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await fetch(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: "gpt-3.5-turbo",
+            messages: [{ role: "system", content: startMessage }],
+            temperature: 0.7,
+          }),
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error("Oops! Something went wrong while processing your request.");
+        
+      }
+  
+      const responseData = await response.json();
+      setIsTyping(false);
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          role: "assistant",
+          content: responseData.choices[0].message.content,
+        },
+      ]);
+    } catch (error) {
+      console.error("Error while fetching chat data:", error);
+      setIsTyping(false);
+    }
+    }
+    initializeChat();
+  }, [])
+
   const handleSendMessage = (messageContent) => {
     setIsTyping(true);
     setMessages((prevMessages) => [
@@ -95,7 +138,7 @@ function OpenAIChatBot() {
                   <h3 className="text-xl font-bold border-b-1 border-gray-300"> 
                     {message.role == "user"
                       ? "User"
-                      : message.role == "system"
+                      : message.role == "assistant"
                       ? "Orthobot"
                       : message.role}</h3>
                 <p className = "text-l">{message.content}</p></div>
