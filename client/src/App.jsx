@@ -129,7 +129,7 @@ function OpenAIChatBot() {
         setIsTyping(false);
       }
     }
-    //initializeChat();
+    initializeChat();
   }, [])
 
   const handleSendMessage = (messageContent) => {
