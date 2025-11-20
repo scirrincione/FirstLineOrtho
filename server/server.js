@@ -27,7 +27,30 @@ app.post('/api/openai', async (req, res) => {
   }
 });
 
-const PORT = 3001;
+if (process.env.NODE_ENV === 'production') {
+  // Serve static files from /FirstLineOrtho
+  app.use('/FirstLineOrtho', express.static(path.join(__dirname, 'build'), {
+    setHeaders: (res, filepath) => {
+      if (filepath.endsWith('.js')) {
+        res.setHeader('Content-Type', 'application/javascript');
+      } else if (filepath.endsWith('.css')) {
+        res.setHeader('Content-Type', 'text/css');
+      }
+    }
+  }));
+  
+  // SPA fallback for /FirstLineOrtho routes
+  app.get('/FirstLineOrtho/*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'build', 'index.html'));
+  });
+  
+  // Redirect root to /FirstLineOrtho
+  app.get('/', (req, res) => {
+    res.redirect('/FirstLineOrtho');
+  });
+}
+
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Backend running on http://localhost:${PORT}`);
 });
