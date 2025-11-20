@@ -1,8 +1,13 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+// import path from 'path';
+// import { fileURLToPath } from 'url';
 
 dotenv.config();
+
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(cors());
@@ -27,28 +32,28 @@ app.post('/api/openai', async (req, res) => {
   }
 });
 
-if (process.env.NODE_ENV === 'production') {
-  // Serve static files from /FirstLineOrtho
-  app.use('/FirstLineOrtho', express.static(path.join(__dirname, 'build'), {
-    setHeaders: (res, filepath) => {
-      if (filepath.endsWith('.js')) {
-        res.setHeader('Content-Type', 'application/javascript');
-      } else if (filepath.endsWith('.css')) {
-        res.setHeader('Content-Type', 'text/css');
-      }
-    }
-  }));
+// // if (process.env.NODE_ENV === 'production') {
+// //   // Serve static files from /FirstLineOrtho
+//   app.use('/FirstLineOrtho', express.static(path.join(__dirname, 'build'), {
+//     setHeaders: (res, filepath) => {
+//       if (filepath.endsWith('.js')) {
+//         res.setHeader('Content-Type', 'application/javascript');
+//       } else if (filepath.endsWith('.css')) {
+//         res.setHeader('Content-Type', 'text/css');
+//       }
+//     }
+//   }));
   
-  // SPA fallback for /FirstLineOrtho routes
-  app.get('/FirstLineOrtho/*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'build', 'index.html'));
-  });
+//   // SPA fallback for /FirstLineOrtho routes
+//   app.get('/FirstLineOrtho/*', (req, res) => {
+//     res.sendFile(path.join(__dirname, 'build', 'index.html'));
+//   });
   
-  // Redirect root to /FirstLineOrtho
-  app.get('/', (req, res) => {
-    res.redirect('/FirstLineOrtho');
-  });
-}
+//   // Redirect root to /FirstLineOrtho
+//   app.get('/', (req, res) => {
+//     res.redirect('/FirstLineOrtho');
+//   });
+// // }
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
