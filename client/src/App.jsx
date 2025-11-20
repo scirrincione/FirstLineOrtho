@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import startMessage from './startMessage';
 
 function OpenAIChatBot() {
-  const API_KEY= import.meta.env.VITE_OPEN_API_KEY;
+  const API_KEY = process.env.OPEN_API_KEY;
+  console.log(API_KEY)
   
   const [messages, setMessages] = useState([
    
