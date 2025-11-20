@@ -1,8 +1,13 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(cors());
@@ -21,13 +26,19 @@ app.post('/api/openai', async (req, res) => {
 
     const data = await response.json();
     res.json(data);
-    console.log('New request', data);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-const PORT = 3001;
+app.use(express.static(path.join(__dirname, 'dist')));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
+
+
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Backend running on http://localhost:${PORT}`);
 });

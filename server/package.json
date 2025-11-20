@@ -2,8 +2,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "server": "node server.js",
-    "dev:all": "concurrently \"npm run dev\" \"npm run server\""
+    "server": "node server.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
