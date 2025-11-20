@@ -2,12 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import startMessage from './startMessage';
 
 function OpenAIChatBot() {
-  const API_KEY = process.env.OPEN_API_KEY;
-  console.log(API_KEY)
-  
-  const [messages, setMessages] = useState([
-   
-  ]);
+
+  const [messages, setMessages] = useState([{role: 'system', content: startMessage}]);
 
   const [isTyping, setIsTyping] = useState(false);
 
@@ -28,32 +24,43 @@ function OpenAIChatBot() {
   useEffect(() => {
     inputRef.current?.focus();
   }, [isTyping]);
-  
+
   const chatData = async (userMessage) => {
     try {
       setIsTyping(true);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      const response = await fetch(
-        "https://api.openai.com/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${API_KEY}`,
-          },
-          body: JSON.stringify({
-            model: "gpt-3.5-turbo",
-            messages: [...messages, { role: "user", content: userMessage }],
-            temperature: 0.7,
-          }),
-        }
-      );
-  
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/openai`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [...messages, { role: "user", content: userMessage }],
+          temperature: 0.7,
+        }),
+      });
+
+      //const data = await response.json();
+      // await new Promise((resolve) => setTimeout(resolve, 1000));
+      // const response = await fetch(
+      //   "https://api.openai.com/v1/chat/completions",
+      //   {
+      //     method: "POST",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //       Authorization: `Bearer ${API_KEY}`,
+      //     },
+      //     body: JSON.stringify({
+      //       model: "gpt-3.5-turbo",
+      //       messages: [...messages, { role: "user", content: userMessage }],
+      //       temperature: 0.7,
+      //     }),
+      //   }
+      // );
+
       if (!response.ok) {
         throw new Error("Oops! Something went wrong while processing your request.");
-        
+
       }
-  
+
       const responseData = await response.json();
       setIsTyping(false);
       setMessages((prevMessages) => [
@@ -70,46 +77,57 @@ function OpenAIChatBot() {
   };
 
   useEffect(() => {
-    if(initializedRef.current) return;
+    if (initializedRef.current) return;
     initializedRef.current = true;
+
     const initializeChat = async () => {
       try {
-      setIsTyping(true);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      const response = await fetch(
-        "https://api.openai.com/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${API_KEY}`,
-          },
+        setIsTyping(true);
+        const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/openai`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             model: "gpt-3.5-turbo",
-            messages: [{ role: "system", content: startMessage }],
+            messages: messages,
             temperature: 0.7,
           }),
+        });
+        // await new Promise((resolve) => setTimeout(resolve, 1000));
+        // const response = await fetch(
+        //   "https://api.openai.com/v1/chat/completions",
+        //   {
+        //     method: "POST",
+        //     headers: {
+        //       "Content-Type": "application/json",
+        //       Authorization: `Bearer ${API_KEY}`,
+        //     },
+        //     body: JSON.stringify({
+        //       model: "gpt-3.5-turbo",
+        //       messages: [{ role: "system", content: startMessage }],
+        //       temperature: 0.7,
+        //     }),
+        //   }
+        // );
+
+        if (!response.ok) {
+          throw new Error("Oops! Something went wrong while processing your request.");
+
         }
-      );
-  
-      if (!response.ok) {
-        throw new Error("Oops! Something went wrong while processing your request.");
-        
+        console.log(response);
+        const responseData = await response.json();
+        setIsTyping(false);
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            role: "assistant",
+            content: responseData.choices[0].message.content,
+          },
+        ]);
+        console.log(messages);
+      } catch (error) {
+        console.error("Error while fetching chat data:", error);
+        setIsTyping(false);
       }
-  
-      const responseData = await response.json();
-      setIsTyping(false);
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          role: "assistant",
-          content: responseData.choices[0].message.content,
-        },
-      ]);
-    } catch (error) {
-      console.error("Error while fetching chat data:", error);
-      setIsTyping(false);
-    }
     }
     initializeChat();
   }, [])
@@ -120,66 +138,67 @@ function OpenAIChatBot() {
       ...prevMessages,
       { role: "user", content: messageContent },
     ]);
-  //invoke chatData
+    //invoke chatData
     chatData(messageContent);
   };
 
 
-    return (
-      <div className="flex flex-col h-screen">
-        {/* Header */}
-        <h1 className = "text-4xl font-bold text-center w-full text-white p-10 flex-box bg-blue-800">First Line Ortho</h1>
-        {/* Main body of page */}
-        <div className = "flex flex-col border-2 rounded-sm border-gray-300 p-4 flex-grow overflow-hidden">
-          {/* Message container */}
-          <div className="flex flex-col flex-grow overflow-y-auto">
-            {messages.map((message, index) => (
+  return (
+    <div className="flex flex-col h-screen">
+      {/* Header */}
+      <h1 className="text-4xl font-bold text-center w-full text-white p-10 flex-box bg-blue-800">First Line Ortho</h1>
+      {/* Main body of page */}
+      <div className="flex flex-col border-2 rounded-sm border-gray-300 p-4 flex-grow overflow-hidden">
+        {/* Message container */}
+        <div className="flex flex-col flex-grow overflow-y-auto">
+          {messages.map((message, index) => (
+            message.role!=='system' && (
               <div key={index} className="mb-4">
-                <div className = "border-2 border-gray-300 p-2 rounded-xl">
-                  <h3 className="text-xl font-bold border-b-1 border-gray-300"> 
-                    {message.role == "user"
-                      ? "User"
-                      : message.role == "assistant"
+              <div className="border-2 border-gray-300 p-2 rounded-xl">
+                <h3 className="text-xl font-bold border-b-1 border-gray-300">
+                  {message.role == "user"
+                    ? "User"
+                    : message.role == "assistant"
                       ? "Orthobot"
                       : message.role}</h3>
-                <p className = "text-l">{message.content}</p></div>
-              </div>
-            ))}
-            {isTyping && <p>Bot is typing...</p>}
-            <div ref={messagesEndRef} />
-          </div>
-          
+                <p className="text-l">{message.content}</p></div>
+            </div>)
+          ))}
+          {isTyping && <p>Bot is typing...</p>}
+          <div ref={messagesEndRef} />
         </div>
-        {/* Chat input bar */}
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            const input = e.target.input.value;
-            if (input.trim() !== "") {
-              handleSendMessage(input);
-              e.target.reset();
-            }
-          }}
-          className="flex items-center gap-2 p-4 border-t border-gray-300"
-        >
-          <input
-            type="text"
-            name="input"
-            placeholder="Type your message..."
-            disabled={isTyping}
-            ref={inputRef}
-            className="flex-grow border border-gray-300 rounded p-2"
-          />
-          <button
-            type="submit"
-            disabled={isTyping}
-            className="bg-blue-500 text-white px-4 py-2 rounded"
-          >
-            Send
-          </button>
-        </form>
+
       </div>
-    );
+      {/* Chat input bar */}
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          const input = e.target.input.value;
+          if (input.trim() !== "") {
+            handleSendMessage(input);
+            e.target.reset();
+          }
+        }}
+        className="flex items-center gap-2 p-4 border-t border-gray-300"
+      >
+        <input
+          type="text"
+          name="input"
+          placeholder="Type your message..."
+          disabled={isTyping}
+          ref={inputRef}
+          className="flex-grow border border-gray-300 rounded p-2"
+        />
+        <button
+          type="submit"
+          disabled={isTyping}
+          className="bg-blue-500 text-white px-4 py-2 rounded"
+        >
+          Send
+        </button>
+      </form>
+    </div>
+  );
 }
 
 export default OpenAIChatBot;
